@@ -116,7 +116,7 @@
           1,
           1500
         );
-        camera.position.set(0, 400, 700);
+        camera.position.set(0, 400, 1000);
 
         cameraTarget = new THREE.Vector3(0, 150, 0);
 
@@ -164,6 +164,8 @@
           createText("酉", -150, 0);
           createText("戌", -120, 70);
           createText("亥", -70, 125);
+
+          createText("高等計算機圖學", 0, -200, 30);
         });
 
         const plane = new THREE.Mesh(
@@ -240,7 +242,9 @@
         }
       }
 
-      function createText(msg, x, y) {
+      function createText(msg, x, y, size) {
+        if (!size) size = this.size;
+
         textGeo = new THREE.TextGeometry(msg, {
           font: font,
 
@@ -284,15 +288,6 @@
         }
       }
 
-      function refreshText() {
-        group.remove(textMesh1);
-        if (mirror) group.remove(textMesh2);
-
-        if (!text) return;
-
-        createText();
-      }
-
       function onPointerDown(event) {
         console.log(event);
         if (event.isPrimary === false) return;
@@ -332,6 +327,45 @@
 
         renderer.render(scene, camera);
       }
+    </script>
+
+    <script>
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      function onMouseMove(event) {
+        // calculate mouse position in normalized device coordinates
+        // (-1 to +1) for both components
+
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      }
+
+      function render() {
+        // update the picking ray with the camera and mouse position
+        raycaster.setFromCamera(mouse, camera);
+
+        // calculate objects intersecting the picking ray
+        const intersects = raycaster.intersectObjects(scene.children);
+
+        for (let i = 0; i < intersects.length; i++) {
+          document.addEventListener(
+            "mousedown",
+            onMouseDown,
+            intersects[i].intersectObjects
+          );
+        }
+
+        renderer.render(scene, camera);
+      }
+
+      function onMouseDown(obj) {
+        console.log(obj);
+      }
+
+      window.addEventListener("mousemove", onMouseMove, false);
+
+      window.requestAnimationFrame(render);
     </script>
   </body>
 </html>
